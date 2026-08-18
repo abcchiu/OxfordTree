@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Pirates Adventure 閱讀測驗</title>
+<style>
+  *{box-sizing:border-box}
+  body{
+    margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif;
+    background:linear-gradient(180deg,#eef7ff,#fff7e8);color:#243042;
+    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  .card{
+    width:min(760px,100%);background:#fff;border-radius:24px;padding:24px;
+    box-shadow:0 18px 50px rgba(0,0,0,.12);
+  }
+  h1{margin:0 0 8px;font-size:30px}
+  .sub{color:#667085;margin-bottom:18px}
+  .progress{height:12px;background:#edf0f4;border-radius:999px;overflow:hidden;margin:18px 0}
+  .bar{height:100%;width:0;background:#ff9f43;transition:width .35s ease}
+  .q{font-size:22px;font-weight:700;line-height:1.45;margin:14px 0 18px}
+  .opt{
+    width:100%;text-align:left;border:2px solid #e5e7eb;background:#fff;border-radius:16px;
+    padding:14px 16px;margin:8px 0;font-size:18px;cursor:pointer;transition:.2s;
+  }
+  .opt:hover{transform:translateY(-1px);border-color:#ffb86b}
+  .opt.correct{border-color:#22c55e;background:#ecfdf3}
+  .opt.wrong{border-color:#ef4444;background:#fff1f2}
+  .next{
+    display:none;margin-top:16px;border:0;border-radius:14px;background:#243042;color:#fff;
+    font-size:18px;padding:12px 20px;cursor:pointer;
+  }
+  .score{font-size:17px;color:#667085;margin-top:8px}
+  .celebrate{
+    display:none;text-align:center;padding:10px 4px 4px;overflow:hidden;position:relative
+  }
+  .celebrate.show{display:block;animation:pop .55s ease both}
+  @keyframes pop{0%{transform:scale(.7);opacity:0}70%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
+  .cat{
+    width:180px;height:160px;margin:10px auto 4px;position:relative;
+    animation:bounce .9s ease-in-out infinite alternate;
+  }
+  @keyframes bounce{from{transform:translateY(0) rotate(-2deg)}to{transform:translateY(-10px) rotate(2deg)}}
+  .head{
+    width:130px;height:110px;background:#f6b94e;border:5px solid #3b2f2f;border-radius:48% 48% 45% 45%;
+    position:absolute;left:25px;top:30px;
+  }
+  .ear{width:46px;height:46px;background:#f6b94e;border:5px solid #3b2f2f;position:absolute;top:15px;transform:rotate(45deg);z-index:-1}
+  .ear.l{left:20px}.ear.r{right:20px}
+  .eye{width:14px;height:18px;background:#3b2f2f;border-radius:50%;position:absolute;top:65px}
+  .eye.l{left:58px}.eye.r{right:58px}
+  .nose{width:14px;height:10px;background:#ef7f8f;border-radius:50%;position:absolute;left:83px;top:88px}
+  .mouth{position:absolute;left:70px;top:96px;font-size:34px;font-weight:700;color:#3b2f2f;transform:rotate(90deg)}
+  .whisker{position:absolute;width:45px;height:3px;background:#3b2f2f;top:96px}
+  .w1{left:1px;transform:rotate(8deg)} .w2{left:3px;top:106px;transform:rotate(-8deg)}
+  .w3{right:1px;transform:rotate(-8deg)} .w4{right:3px;top:106px;transform:rotate(8deg)}
+  .yay{font-size:42px;font-weight:900;margin:8px 0 4px;color:#ff7a00}
+  .meow{font-size:28px;font-weight:800;margin:4px 0 14px}
+  .stars{position:absolute;inset:0;pointer-events:none}
+  .star{position:absolute;font-size:28px;animation:float 1.8s ease-in-out infinite}
+  @keyframes float{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-16px) rotate(16deg)}}
+  .again{border:0;border-radius:14px;background:#ff9f43;color:#fff;font-size:18px;padding:12px 20px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="card">
+  <div id="quiz">
+    <h1>🏴‍☠️ Pirates Adventure 閱讀測驗</h1>
+    <div class="sub">共 6 題｜英文題目＋中文提示</div>
+    <div class="progress"><div class="bar" id="bar"></div></div>
+    <div id="counter" class="score"></div>
+    <div id="question" class="q"></div>
+    <div id="options"></div>
+    <button id="next" class="next">下一題</button>
+  </div>
+
+  <div id="celebrate" class="celebrate">
+    <div class="stars">
+      <span class="star" style="left:10%;top:12%">⭐</span>
+      <span class="star" style="left:82%;top:18%;animation-delay:.2s">✨</span>
+      <span class="star" style="left:20%;top:62%;animation-delay:.4s">🌟</span>
+      <span class="star" style="left:76%;top:66%;animation-delay:.6s">⭐</span>
+    </div>
+    <div class="cat" aria-label="可愛貓咪圖">
+      <div class="ear l"></div><div class="ear r"></div>
+      <div class="head"></div>
+      <div class="eye l"></div><div class="eye r"></div>
+      <div class="nose"></div><div class="mouth">3</div>
+      <div class="whisker w1"></div><div class="whisker w2"></div>
+      <div class="whisker w3"></div><div class="whisker w4"></div>
+    </div>
+    <div class="yay">🎉 測驗完成！</div>
+    <div id="finalScore" class="meow"></div>
+    <div class="meow">🐱 喵～棒棒！</div>
+    <button class="again" onclick="restart()">再玩一次</button>
+  </div>
+</div>
+
+<script>
+const qs=[
+ {q:"1. What was Biff looking at at the beginning of the story?<br>（故事一開始，Biff 正在看什麼？）",
+  a:["A. A book about animals","B. A magic map","C. A picture of the sea","D. A book about pirates"],c:3},
+ {q:"2. What happened when the magic began to work?<br>（魔法開始作用時，發生了什麼事？）",
+  a:["A. The house disappeared.","B. The key broke.","C. The children got smaller.","D. The children fell asleep."],c:2},
+ {q:"3. Where did the children go after Biff opened the door?<br>（Biff 打開門後，孩子們去了哪裡？）",
+  a:["A. To a school","B. To a beach by the sea","C. To a farm","D. To a zoo"],c:1},
+ {q:"4. Who came up while the children were playing?<br>（孩子們玩耍時，誰走了過來？）",
+  a:["A. A teacher","B. A fisherman","C. A pirate","D. A police officer"],c:2},
+ {q:"5. Why did the pirates take the children to the pirate ship?<br>（海盜為什麼帶孩子們到海盜船？）",
+  a:["A. To find treasure","B. To invite them to a party","C. To clean the ship","D. To send them home"],c:1},
+ {q:"6. How did Biff's feelings about pirates change?<br>（最後 Biff 對海盜的感覺有什麼改變？）",
+  a:["A. She liked them, then disliked them.","B. She stayed afraid.","C. She was angry.","D. She changed from not liking pirates to liking them."],c:3}
+];
+let i=0,score=0,locked=false;
+const qEl=document.getElementById('question'), opts=document.getElementById('options'),
+next=document.getElementById('next'), bar=document.getElementById('bar'), counter=document.getElementById('counter');
+
+function render(){
+  locked=false; next.style.display='none'; opts.innerHTML='';
+  qEl.innerHTML=qs[i].q; counter.textContent=`第 ${i+1} 題 / 6　目前答對 ${score} 題`;
+  bar.style.width=`${(i/qs.length)*100}%`;
+  qs[i].a.forEach((t,idx)=>{
+    const b=document.createElement('button'); b.className='opt'; b.textContent=t;
+    b.onclick=()=>choose(b,idx); opts.appendChild(b);
+  });
+}
+function choose(btn,idx){
+  if(locked)return; locked=true;
+  const buttons=[...document.querySelectorAll('.opt')];
+  buttons[qs[i].c].classList.add('correct');
+  if(idx===qs[i].c) score++; else btn.classList.add('wrong');
+  next.style.display='inline-block';
+}
+next.onclick=()=>{
+  i++;
+  if(i<qs.length) render(); else finish();
+};
+
+function finish(){
+  document.getElementById('quiz').style.display='none';
+  document.getElementById('celebrate').classList.add('show');
+  document.getElementById('finalScore').textContent=`你答對 ${score} / 6 題！`;
+  bar.style.width='100%';
+  playMeowBangBang();
+}
+
+function playMeowBangBang(){
+  try{
+    // 可愛提示音
+    const AC=window.AudioContext||window.webkitAudioContext;
+    const ctx=new AC();
+    [523.25,659.25,783.99].forEach((f,n)=>{
+      const o=ctx.createOscillator(), g=ctx.createGain();
+      o.type='sine'; o.frequency.value=f; g.gain.value=.0001;
+      o.connect(g); g.connect(ctx.destination);
+      const st=ctx.currentTime+n*.14;
+      g.gain.exponentialRampToValueAtTime(.18,st+.02);
+      g.gain.exponentialRampToValueAtTime(.0001,st+.18);
+      o.start(st);o.stop(st+.2);
+    });
+  }catch(e){}
+  if('speechSynthesis' in window){
+    const u=new SpeechSynthesisUtterance('喵～棒棒！');
+    u.lang='zh-TW';u.rate=.9;u.pitch=1.5;u.volume=1;
+    setTimeout(()=>speechSynthesis.speak(u),450);
+  }
+}
+function restart(){
+  i=0;score=0;
+  document.getElementById('celebrate').classList.remove('show');
+  document.getElementById('quiz').style.display='block';
+  render();
+}
+render();
+</script>
+</body>
+</html>
